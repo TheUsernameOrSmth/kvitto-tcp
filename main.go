@@ -3,16 +3,24 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 var mq mqtt.Client
+var mqttTopic string = "kistan/bong"
 
 func main() {
 	if err := setupMQTT(); err != nil {
 		log.Fatal(err)
+	}
+	envMqttTopic := os.Getenv("MQTT_TOPIC")
+	if envMqttTopic != "" {
+		mqttTopic = envMqttTopic
+	} else {
+		log.Println("MQTT_TOPIC not set, defaulting to", mqttTopic)
 	}
 
 	l, err := net.Listen("tcp4", "0.0.0.0:9100")

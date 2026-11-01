@@ -20,13 +20,13 @@ type Message struct {
 
 func (m *Message) publish() {
 	data, _ := json.Marshal(m)
-	mq.Publish("kistan/bong/message", 0, false, data)
+	mq.Publish(mqttTopic+"/message", 0, false, data)
 }
 
 func (k *Kvitto) publish() {
 	k.Timestamp = k.Time.Unix()
 	data, _ := json.Marshal(k)
-	mq.Publish("kistan/bong/kvitto", 0, false, data)
+	mq.Publish(mqttTopic+"/kvitto", 0, false, data)
 }
 
 type SoldProduct struct {
