@@ -107,7 +107,11 @@ func (p *BongParser) readToken() *TokenBlock {
 }
 
 func (p *BongParser) readTrimmed() string {
-	return strings.TrimSpace(p.readToken().text)
+	token := p.readToken()
+	if token == nil {
+		return ""
+	}
+	return strings.TrimSpace(token.text)
 }
 
 func (p *BongParser) peekToken() *TokenBlock {
@@ -140,13 +144,13 @@ func (p *BongParser) expectFormat(format string) bool {
 
 func (p *BongParser) expectFormats(formats []string) bool {
 	id := p.currentTokenIndex
+	defer func() { p.currentTokenIndex = id }()
 	for _, v := range formats {
 		if !p.expectFormat(v) {
 			return false
 		}
 		p.discardToken()
 	}
-	p.currentTokenIndex = id
 	return true
 }
 

@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 	"unicode/utf16"
 )
@@ -41,7 +40,7 @@ const (
 	FeedNLines SpecialBlockType = 2
 )
 
-func (t SpecialBlockType) name() string {
+func (t SpecialBlockType) String() string {
 	switch t {
 	case Text:
 		return "Text"
@@ -107,21 +106,8 @@ func (t *TokenBlock) print() {
 	if t.specialType == Text {
 		fmt.Printf("%s: %s\n", t.format.shortForm(), strings.ReplaceAll(t.text, "\n", "\\n"))
 	} else {
-		fmt.Printf("[Special: %s ]\n", t.specialType.name())
+		fmt.Printf("[Special: %s ]\n", t.specialType)
 	}
-}
-
-var endOfReceiptRegex = regexp.MustCompile("Beställd: [0-9]+ [a+z]+ [0-9]+:[0-9]+") // Regexp for final line
-func (t *TokenBlock) isClosingToken() bool {
-	if (!t.format.equals(&TextFormat{
-		bold:          true,
-		characterSize: 0,
-		alignment:     AlignLeft,
-		underline:     UnderlineNone,
-	})) {
-		return false
-	}
-	return endOfReceiptRegex.FindString(t.text) != ""
 }
 
 type TokenBlocks []TokenBlock
@@ -141,10 +127,6 @@ func (t *Tokenizer) readToEnd() error {
 		}
 		if err != nil {
 			return err
-		}
-		if t.currentToken.isClosingToken() {
-			t.pushCurrentToken()
-			break
 		}
 	}
 	return nil
