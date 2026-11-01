@@ -28,6 +28,22 @@ type BongParser struct {
 	currentTokenIndex int
 }
 
+const (
+	TF_MESSAGE                 = "10B"
+	TF_HEADER_TO               = "30"
+	TF_HEADER_BESTALLNING      = "20"
+	TF_HEADER_KVITTONR         = "20U"
+	TF_HEADER_NUMBER           = "20"
+	TF_HEADER_DIVIDER          = "10"
+	TF_BODY_INITIAL_BLANK_LINE = "10B"
+	TF_BODY_CATEGORY           = "10CBU"
+	TF_BODY_COUNT              = "20B"
+	TF_BODY_PRODUCT            = "10B"
+	TF_BODY_EXTRA_INFO         = "10B"
+	TF_BODY_DIVIDER            = "10B"
+	TF_FOOTER                  = "0B"
+)
+
 func parseMessage(message []byte) {
 	currentFormat := TextFormat{
 		bold:          false,
@@ -156,7 +172,7 @@ func (p *BongParser) expectFormats(formats []string) bool {
 
 func (p *BongParser) parseMessage() error {
 	p.reset()
-	if !p.expectFormat("10B") {
+	if !p.expectFormat(TF_MESSAGE) {
 		return fmt.Errorf("expected Kvitto")
 	}
 	message := p.readTrimmed()
@@ -200,7 +216,12 @@ func (p *BongParser) parseKvitto() error {
 }
 
 func (p *BongParser) parseHeader() error {
-	if !p.expectFormats([]string{"30", "20", "20U", "20", "10"}) {
+	if !p.expectFormats([]string{
+		TF_HEADER_TO,
+		TF_HEADER_BESTALLNING,
+		TF_HEADER_KVITTONR,
+		TF_HEADER_NUMBER,
+		TF_HEADER_DIVIDER}) {
 		return errors.New("wrong format")
 	}
 
@@ -240,17 +261,17 @@ func (p *BongParser) parseBody() error {
 		if p.isAtEnd() {
 			return nil
 		}
-		if p.expectFormat("0B") {
+		if p.expectFormat(TF_FOOTER) {
 			return nil // Footer;
 		}
-		if p.expectFormat("10B") {
+		if p.expectFormat(TF_BODY_INITIAL_BLANK_LINE) {
 			p.discardToken()
 		}
-		if p.expectFormat("10CBU") {
+		if p.expectFormat(TF_BODY_CATEGORY) {
 			// Category assignment
 			p.currentCategory = p.readTrimmed()
 		}
-		if !p.expectFormats([]string{"20B", "10B"}) {
+		if !p.expectFormats([]string{TF_BODY_COUNT, TF_BODY_PRODUCT}) {
 			return errors.New("wrong format")
 		}
 
@@ -270,21 +291,23 @@ func (p *BongParser) parseBody() error {
 		currentSold.Name = p.readTrimmed()
 		currentSold.ExtraText = ""
 
-		if p.expectFormat("10B") {
+		if p.expectFormat(TF_BODY_EXTRA_INFO) {
 			extra_text := p.readTrimmed()
-			if extra_text != "-----------------------" {
+			if extra_text == "-----------------------" {
+				p.currentTokenIndex-- // This is a divider we have and not extra info
+			} else {
 				currentSold.ExtraText = extra_text
-				if p.expectFormat("10B") {
-					p.discardToken() // "-----------------------"
-				}
 			}
+		}
+		if p.expectFormat(TF_BODY_DIVIDER) {
+			p.discardToken() // "-----------------------"
 		}
 		p.kvitto.Sold = append(p.kvitto.Sold, currentSold)
 	}
 }
 
 func (p *BongParser) parseFooter() error {
-	if !p.expectFormat("0B") {
+	if !p.expectFormat(TF_FOOTER) {
 		return errors.New("wrong format")
 	}
 
