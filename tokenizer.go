@@ -79,22 +79,6 @@ func (t *TextFormat) shortForm() string {
 	return s
 }
 
-func (t1 *TextFormat) equals(t2 *TextFormat) bool {
-	if t1.alignment != t2.alignment {
-		return false
-	}
-	if t1.bold != t2.bold {
-		return false
-	}
-	if t1.characterSize != t2.characterSize {
-		return false
-	}
-	if t1.underline != t2.underline {
-		return false
-	}
-	return true
-}
-
 type TokenBlock struct {
 	format      TextFormat
 	text        string
