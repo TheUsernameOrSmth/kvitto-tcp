@@ -11,6 +11,8 @@ import (
 
 var mq mqtt.Client
 var mqttTopic string = "kistan/bong"
+var mqttUsername string = ""
+var mqttPassword string = ""
 
 func main() {
 	if err := setupMQTT(); err != nil {
@@ -22,6 +24,8 @@ func main() {
 	} else {
 		log.Println("MQTT_TOPIC not set, defaulting to", mqttTopic)
 	}
+	mqttUsername = os.Getenv("MQTT_USERNAME")
+	mqttPassword = os.Getenv("MQTT_PASSWORD")
 
 	l, err := net.Listen("tcp4", "0.0.0.0:9100")
 	if err != nil {
@@ -48,6 +52,8 @@ func main() {
 func setupMQTT() error {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker("tcp://server.insektionen.se:1883")
+	opts.SetUsername(mqttUsername)
+	opts.SetPassword(mqttPassword)
 	opts.SetAutoReconnect(true)
 	opts.SetCleanSession(true)
 	opts.SetPingTimeout(time.Second * 30)

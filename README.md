@@ -20,7 +20,7 @@ The current connection settings are defined in [main.go](main.go) and
 | Setting      | Value                              |
 |--------------|------------------------------------|
 | TCP listener | `0.0.0.0:9100`                     |
-| MQTT broker  | `tcp://server.insektionen.se:1883` |
+| MQTT broker  | `tcp://mqtt.kth.it:1883` |
 | MQTT topic   | `kistan/bong`                      |
 
 Note: the MQTT topic can be overridden with the ENV variable `MQTT_TOPIC`
