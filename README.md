@@ -24,6 +24,7 @@ The current connection settings are defined in [main.go](main.go) and
 | MQTT topic   | `kistan/bong`                      |
 
 Note: the MQTT topic can be overridden with the ENV variable `MQTT_TOPIC`
+`MQTT_USERNAME` and `MQTT_PASSWORD` also need to be configured if the broker requires it.
 
 The service connects to MQTT before opening the TCP listener. Configure the
 receipt source to send printer data to this machine on port `9100`.
